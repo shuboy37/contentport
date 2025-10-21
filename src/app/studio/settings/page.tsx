@@ -5,6 +5,7 @@ import DuolingoButton from '@/components/ui/duolingo-button'
 import { UpgradeDrawer } from '@/components/upgrade-drawer'
 import { authClient } from '@/lib/auth-client'
 import { client } from '@/lib/client'
+import { X } from 'lucide-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
@@ -156,6 +157,18 @@ const Page = () => {
             Sign out
           </p>
         </div>
+        <DuolingoButton
+          variant="destructive"
+          size="icon"
+          className="absolute top-4 right-4 size-8 opacity-100 z-10"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            router.back()
+          }}
+        >
+          <X className="size-4" />
+        </DuolingoButton>
       </div>
     </div>
   )

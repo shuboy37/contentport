@@ -1,4 +1,5 @@
 import { redis } from '@/lib/redis'
+// @ts-ignore - Type declaration issue with hono/http-exception
 import { HTTPException } from 'hono/http-exception'
 import { TwitterApi } from 'twitter-api-v2'
 import { z } from 'zod'

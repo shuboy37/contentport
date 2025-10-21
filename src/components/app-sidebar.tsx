@@ -1,6 +1,15 @@
 'use client'
 
-import { ArrowUp, History, Paperclip, Plus, RotateCcw, Square, X } from 'lucide-react'
+import {
+  ArrowUp,
+  History,
+  Paperclip,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Square,
+  X,
+} from 'lucide-react'
 import { useCallback, useContext, useEffect, useState } from 'react'
 
 import {
@@ -12,6 +21,7 @@ import {
   SidebarRail,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { ConditionalTooltip } from './ui/conditional-tooltip'
 import { useAttachments } from '@/hooks/use-attachments'
 import { useChatContext } from '@/hooks/use-chat'
 import { client } from '@/lib/client'
@@ -22,9 +32,9 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import {
   $createParagraphNode,
   $createTextNode,
@@ -52,6 +62,9 @@ import {
   DialogTitle,
 } from './ui/dialog'
 import { MemoryTweet, PayloadTweet, useTweetsV2 } from '@/hooks/use-tweets-v2'
+import toast from 'react-hot-toast'
+import { HTTPException } from 'hono/http-exception'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 
 const ChatInput = ({
   onSubmit,
@@ -66,6 +79,8 @@ const ChatInput = ({
 }) => {
   const [editor] = useLexicalComposerContext()
   const { isDragging } = useContext(FileUploadContext)
+  // const [isShimmering, setIsShimmering] = useState(false)
+  const [originalText, setOriginalText] = useState('')
 
   const { attachments, removeAttachment, addKnowledgeAttachment, hasUploading } =
     useAttachments()
@@ -80,6 +95,73 @@ const ChatInput = ({
       root.clear()
       root.append($createParagraphNode())
     })
+  }
+
+  const enhancePromptMutation = useMutation({
+    mutationFn: async (text: string) => {
+      const res = await client.chat.enhancePrompt.$post({ text })
+      return await res.json()
+    },
+    onMutate: (text) => {
+      setOriginalText(text)
+      // setIsShimmering(true)
+
+      editor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode(text)
+        paragraph.append(textNode)
+        root.append(paragraph)
+      })
+    },
+    onSuccess: (data) => {
+      // setIsShimmering(false)
+      setOriginalText('')
+
+      const { enhancedText } = data
+      editor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode(enhancedText)
+        paragraph.append(textNode)
+        paragraph.selectEnd()
+        root.append(paragraph)
+      })
+    },
+    onError: (error) => {
+      // setIsShimmering(false)
+
+      editor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode(originalText)
+        paragraph.append(textNode)
+        paragraph.selectEnd()
+        root.append(paragraph)
+      })
+
+      setOriginalText('')
+
+      if (error instanceof HTTPException) {
+        toast.error(error.message)
+        return
+      }
+      toast.error('Failed to enhance prompt')
+    },
+  })
+
+  const handleEnhancePrompt = async () => {
+    const currentText = editor.read(() => $getRoot().getTextContent().trim())
+
+    if (!currentText.trim()) {
+      toast.error('Please enter some text to enhance')
+      return
+    }
+
+    enhancePromptMutation.mutate(currentText)
   }
 
   useEffect(() => {
@@ -194,7 +276,7 @@ const ChatInput = ({
       <div className="space-y-3">
         <div
           className={`relative transition-all rounded-xl duration-300 ease-out ${
-            isDragging ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-gray-100' : ''
+            isDragging && 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-gray-100'
           }`}
         >
           {isDragging && (
@@ -209,6 +291,17 @@ const ChatInput = ({
             </div>
           )}
           <div className="relative">
+            {originalText && (
+              <div className="absolute inset-0 z-10 flex items-start px-4 py-3">
+                <TextShimmer
+                  className="text-base min-h-[4.5rem] flex items-start"
+                  duration={0.7}
+                >
+                  {originalText}
+                </TextShimmer>
+              </div>
+            )}
+
             <div
               className={`rounded-xl bg-white border-2 shadow-[0_2px_0_#E5E7EB] font-medium transition-all duration-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-600 ${
                 isDragging
@@ -220,7 +313,9 @@ const ChatInput = ({
                 contentEditable={
                   <ContentEditable
                     autoFocus
-                    className="w-full px-4 py-3 outline-none min-h-[4.5rem] text-base placeholder:text-gray-400"
+                    className={`w-full px-4 py-3 outline-none min-h-[4.5rem] text-base placeholder:text-gray-400 ${
+                      originalText && 'text-transparent'
+                    }`}
                     style={{ minHeight: '4.5rem' }}
                     onPaste={handlePaste}
                   />
@@ -233,13 +328,34 @@ const ChatInput = ({
 
               <div className="flex items-center justify-between px-3 pb-3">
                 <div className="flex gap-1.5 items-center">
-                  <FileUploadTrigger asChild>
-                    <DuolingoButton type="button" variant="secondary" size="icon">
-                      <Paperclip className="text-stone-600 size-5" />
-                    </DuolingoButton>
-                  </FileUploadTrigger>
+                  <ConditionalTooltip
+                    content="Attach a file"
+                    side="top"
+                    showTooltip={true}
+                  >
+                    <FileUploadTrigger asChild>
+                      <DuolingoButton type="button" variant="secondary" size="icon">
+                        <Paperclip className="text-stone-600 size-5" />
+                      </DuolingoButton>
+                    </FileUploadTrigger>
+                  </ConditionalTooltip>
 
                   <KnowledgeSelector onSelectDocument={handleAddKnowledgeDoc} />
+                  <ConditionalTooltip
+                    content="Enhance your prompt"
+                    side="top"
+                    showTooltip={true}
+                  >
+                    <DuolingoButton
+                      onClick={handleEnhancePrompt}
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      disabled={enhancePromptMutation.isPending}
+                    >
+                      <Sparkles className="text-stone-600 size-5" />
+                    </DuolingoButton>
+                  </ConditionalTooltip>
                 </div>
 
                 {disabled ? (

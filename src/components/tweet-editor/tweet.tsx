@@ -3,7 +3,7 @@
 import { useTweetsV2 } from '@/hooks/use-tweets-v2'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { Plus, X } from 'lucide-react'
+import { Spool, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { TweetItem } from './tweet-item'
 import { useRef, useState } from 'react'
@@ -79,7 +79,7 @@ export default function Tweet({ editMode = false }: TweetProps) {
         onClick={() => addTweet({ initialContent: '' })}
         className="border border-dashed border-gray-300 bg-white rounded-lg px-3 py-1 flex items-center text-xs text-gray-600 mt-3 mx-auto"
       >
-        <Plus className="size-3 mr-1" />
+        <Spool className="size-3 mr-1 text-stone-800/70" />
         Thread
       </button>
     </div>

@@ -74,7 +74,7 @@ export const AttachmentsProvider = ({ children }: PropsWithChildren) => {
       const res = await client.file.upload.$post({
         fileName: file.name,
         fileType: file.type,
-        source: "chat"
+        source: 'chat',
       })
 
       const { url, fields, fileKey, type } = await res.json()

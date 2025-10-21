@@ -3,6 +3,7 @@ import { account as accountSchema } from '@/db/schema'
 import { chatLimiter } from '@/lib/chat-limiter'
 import { redis } from '@/lib/redis'
 import { and, desc, eq } from 'drizzle-orm'
+// @ts-ignore - Type declaration issue with hono/http-exception
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { j, privateProcedure } from '../jstack'

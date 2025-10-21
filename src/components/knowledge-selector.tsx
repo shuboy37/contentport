@@ -19,6 +19,7 @@ import DuolingoButton from '@/components/ui/duolingo-button'
 import { KnowledgeDocument } from '@/db/schema'
 import { InferOutput } from '@/server'
 import { Icons } from './icons'
+import { ConditionalTooltip } from './ui/conditional-tooltip'
 
 interface KnowledgeSelectorProps {
   onSelectDocument: (doc: SelectedKnowledgeDocument) => void
@@ -81,16 +82,22 @@ export function KnowledgeSelector({ onSelectDocument }: KnowledgeSelectorProps) 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <DuolingoButton
-          type="button"
-          variant="secondary"
-          size="icon"
-          className="flex items-center justify-center"
-          onMouseEnter={handlePrefetch}
-          onFocus={handlePrefetch}
+        <ConditionalTooltip
+          content="Insert from knowledge base"
+          side="top"
+          showTooltip={true}
         >
-          <span className="text-lg">🧠</span>
-        </DuolingoButton>
+          <DuolingoButton
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="flex items-center justify-center"
+            onMouseEnter={handlePrefetch}
+            onFocus={handlePrefetch}
+          >
+            <span className="text-lg">🧠</span>
+          </DuolingoButton>
+        </ConditionalTooltip>
       </PopoverTrigger>
       <PopoverContent align="start" side="top" className="w-[420px] p-0" sideOffset={12}>
         <Command className="rounded-xl border-stone-200 bg-white">
@@ -154,7 +161,7 @@ export function KnowledgeSelector({ onSelectDocument }: KnowledgeSelectorProps) 
                             ) : doc.type === 'txt' ? (
                               <Icons.txt className="size-7 -ml-[1px]" />
                             ) : doc.type === 'url' ? (
-                              <span className='text-xl'>🔗</span>
+                              <span className="text-xl">🔗</span>
                             ) : null}
                           </div>
                           <div className="flex-1 min-w-0">

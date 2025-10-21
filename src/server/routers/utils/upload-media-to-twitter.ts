@@ -1,5 +1,7 @@
 import { Account } from '@/db/schema'
 import { redis } from '@/lib/redis'
+import { s3Client } from '@/lib/s3'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { HTTPException } from 'hono/http-exception'
 import { TwitterApi } from 'twitter-api-v2'
 
@@ -8,15 +10,15 @@ const consumerSecret = process.env.TWITTER_CONSUMER_SECRET as string
 
 export const validateMediaUploadAge = async (mediaId: string): Promise<boolean> => {
   const uploadTimestamp = await redis.get<number>(`tweet-media-upload:${mediaId}`)
-  
+
   if (!uploadTimestamp) {
     return false
   }
-  
+
   const now = Date.now()
   const twentyFourHoursInMs = 24 * 60 * 60 * 1000
-  
-  return (now - uploadTimestamp) < twentyFourHoursInMs
+
+  return now - uploadTimestamp < twentyFourHoursInMs
 }
 
 export const ensureValidMedia = async ({
@@ -27,23 +29,25 @@ export const ensureValidMedia = async ({
   mediaItems: { s3Key: string; media_id: string }[]
 }): Promise<{ s3Key: string; media_id: string }[]> => {
   const validatedMedia: { s3Key: string; media_id: string }[] = []
-  
+
   for (const mediaItem of mediaItems) {
     const isValid = await validateMediaUploadAge(mediaItem.media_id)
-    
+
     if (isValid) {
       validatedMedia.push(mediaItem)
     } else {
       const mediaUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${mediaItem.s3Key}`
       const response = await fetch(mediaUrl)
-      
+
       if (!response.ok) {
-        throw new HTTPException(400, { message: `Failed to fetch media from S3: ${mediaItem.s3Key}` })
+        throw new HTTPException(400, {
+          message: `Failed to fetch media from S3: ${mediaItem.s3Key}`,
+        })
       }
-      
+
       const contentType = response.headers.get('content-type') || ''
       let mediaType: string
-      
+
       if (contentType.startsWith('image/gif')) {
         mediaType = 'gif'
       } else if (contentType.startsWith('image/')) {
@@ -51,27 +55,29 @@ export const ensureValidMedia = async ({
       } else if (contentType.startsWith('video/')) {
         mediaType = 'video'
       } else {
-        throw new HTTPException(400, { message: `Unsupported media type: ${contentType}` })
+        throw new HTTPException(400, {
+          message: `Unsupported media type: ${contentType}`,
+        })
       }
-      
+
       const { mediaId: newMediaId } = await uploadMediaToTwitter({
         account,
         s3Key: mediaItem.s3Key,
         mediaType,
       })
-      
+
       const nowUnix = Date.now()
       await redis.set(`tweet-media-upload:${newMediaId}`, nowUnix, {
         ex: 60 * 60 * 24,
       })
-      
+
       validatedMedia.push({
         s3Key: mediaItem.s3Key,
         media_id: newMediaId,
       })
     }
   }
-  
+
   return validatedMedia
 }
 
@@ -93,34 +99,52 @@ export const uploadMediaToTwitter = async ({
     accessSecret: account.accessSecret as string,
   })
 
-  const mediaUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`
-  const response = await fetch(mediaUrl)
+  // Use AWS SDK to fetch the object directly (more secure)
+  const bucketName = process.env.NEXT_PUBLIC_S3_BUCKET_NAME as string
 
-  if (!response.ok) {
-    throw new HTTPException(400, { message: 'Failed to fetch media from S3' })
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: s3Key,
+    })
+
+    const response = await s3Client.send(command)
+
+    if (!response.Body) {
+      throw new HTTPException(400, { message: 'Failed to fetch media from S3: No body' })
+    }
+
+    // Convert the stream to a buffer
+    const chunks: Uint8Array[] = []
+    for await (const chunk of response.Body as any) {
+      chunks.push(chunk)
+    }
+    const buffer = Buffer.concat(chunks)
+
+    let mimeType: string = ''
+
+    switch (mediaType) {
+      case 'image':
+        mimeType = response.ContentType || 'image/png'
+        break
+      case 'gif':
+        mimeType = 'image/gif'
+        break
+      case 'video':
+        mimeType = response.ContentType || 'video/mp4'
+        break
+    }
+
+    const mediaId = await client.v1.uploadMedia(buffer, {
+      mimeType,
+      additionalOwners,
+    })
+
+    return { mediaId }
+  } catch (error) {
+    console.error('Error fetching media from S3:', error)
+    throw new HTTPException(400, {
+      message: `Failed to fetch media from S3: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    })
   }
-
-  const buffer = await response.arrayBuffer()
-
-  let mimeType: string = ''
-
-  switch (mediaType) {
-    case 'image':
-      mimeType = response.headers.get('content-type') || 'image/png'
-      break
-    case 'gif':
-      mimeType = 'image/gif'
-      break
-    case 'video':
-      mimeType = response.headers.get('content-type') || 'video/mp4'
-      break
-  }
-
-  const mediaBuffer = Buffer.from(buffer)
-  const mediaId = await client.v1.uploadMedia(mediaBuffer, {
-    mimeType,
-    additionalOwners,
-  })
-
-  return { mediaId }
 }

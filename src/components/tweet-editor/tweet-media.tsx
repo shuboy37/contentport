@@ -4,6 +4,7 @@ import { AlertCircle, Download, MessageSquarePlus, X } from 'lucide-react'
 import DuolingoButton from '../ui/duolingo-button'
 import toast from 'react-hot-toast'
 import { useAttachments } from '@/hooks/use-attachments'
+import { ConditionalTooltip } from '../ui/conditional-tooltip'
 
 const RenderMediaOverlay = ({
   tweetId,
@@ -66,20 +67,24 @@ const RenderMediaOverlay = ({
             <MessageSquarePlus className="size-4" />
           </DuolingoButton>
         )}
-        <DuolingoButton
-          size="icon"
-          variant="secondary"
-          onClick={() => downloadMediaFile(mediaFile)}
-        >
-          <Download className="size-4" />
-        </DuolingoButton>
-        <DuolingoButton
-          size="icon"
-          variant="destructive"
-          onClick={() => removeMediaFile(tweetId, mediaFile.id)}
-        >
-          <X className="h-4 w-4" />
-        </DuolingoButton>
+        <ConditionalTooltip content="Download" side="top" showTooltip={true}>
+          <DuolingoButton
+            size="icon"
+            variant="secondary"
+            onClick={() => downloadMediaFile(mediaFile)}
+          >
+            <Download className="size-4" />
+          </DuolingoButton>
+        </ConditionalTooltip>
+        <ConditionalTooltip content="Remove from tweet" side="top" showTooltip={true}>
+          <DuolingoButton
+            size="icon"
+            variant="destructive"
+            onClick={() => removeMediaFile(tweetId, mediaFile.id)}
+          >
+            <X className="h-4 w-4" />
+          </DuolingoButton>
+        </ConditionalTooltip>
       </div>
     </>
   )

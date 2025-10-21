@@ -43,7 +43,7 @@ export const knowledgeRouter = j.router({
         .select()
         .from(knowledgeDocument)
         .where(
-          and(eq(knowledgeDocument.userId, user.id), eq(knowledgeDocument.id, input.id))
+          and(eq(knowledgeDocument.userId, user.id), eq(knowledgeDocument.id, input.id)),
         )
 
       if (!document) {
@@ -60,7 +60,7 @@ export const knowledgeRouter = j.router({
           limit: z.number().min(1).max(100).default(100).optional(),
           offset: z.number().min(0).default(0).optional(),
         })
-        .optional()
+        .optional(),
     )
     .query(async ({ c, ctx, input }) => {
       const { user } = ctx
@@ -87,7 +87,10 @@ export const knowledgeRouter = j.router({
           .update(knowledgeDocument)
           .set({ isDeleted: true })
           .where(
-            and(eq(knowledgeDocument.id, input.id), eq(knowledgeDocument.userId, user.id))
+            and(
+              eq(knowledgeDocument.id, input.id),
+              eq(knowledgeDocument.userId, user.id),
+            ),
           )
 
         return c.json({

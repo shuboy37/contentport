@@ -38,6 +38,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import ContentLengthIndicator from './content-length-indicator'
 import { ImageTool } from './image-tool'
 import { TweetMedia } from './tweet-media'
+import { ConditionalTooltip } from '../ui/conditional-tooltip'
 
 const TWITTER_MEDIA_TYPES = {
   image: ['image/jpeg', 'image/png', 'image/webp'],

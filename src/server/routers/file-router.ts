@@ -1,7 +1,14 @@
 import { db } from '@/db'
 import { account as accountSchema, knowledgeDocument } from '@/db/schema'
 import { redis } from '@/lib/redis'
-import { FILE_TYPE_MAP, s3Client } from '@/lib/s3'
+import {
+  FILE_TYPE_MAP,
+  s3Client,
+  ALLOWED_DOCUMENT_TYPES,
+  ALLOWED_IMAGE_TYPES,
+  BUCKET_NAME,
+  MAX_FILE_SIZE,
+} from '@/lib/s3'
 import { HeadObjectCommand, HeadObjectCommandOutput } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { and, eq } from 'drizzle-orm'
@@ -13,24 +20,6 @@ import { z } from 'zod'
 import { j, privateProcedure } from '../jstack'
 import { getAccount } from './utils/get-account'
 import { uploadMediaToTwitter } from './utils/upload-media-to-twitter'
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME as string
-
-const ALLOWED_DOCUMENT_TYPES = [
-  'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'text/markdown',
-]
-
-const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-]
 
 // Twitter-compliant media types and size limits
 const TWITTER_MEDIA_TYPES = {
@@ -75,7 +64,7 @@ export const fileRouter = j.router({
       const fileKey = `${input.source ?? 'chat'}/${user.id}/${nanoid()}.${fileExtension}`
 
       const { url, fields } = await createPresignedPost(s3Client, {
-        Bucket: BUCKET_NAME,
+        Bucket: BUCKET_NAME as string,
         Key: fileKey,
         Conditions: [
           ['content-length-range', 0, 10485760],
@@ -129,7 +118,7 @@ export const fileRouter = j.router({
       const fileKey = `tweet-media/${user.id}/${nanoid()}.${fileExtension}`
 
       const { url, fields } = await createPresignedPost(s3Client, {
-        Bucket: BUCKET_NAME,
+        Bucket: BUCKET_NAME as string,
         Key: fileKey,
         Conditions: [
           ['content-length-range', 0, sizeLimit],

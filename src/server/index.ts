@@ -1,5 +1,9 @@
+// @ts-ignore - Type declaration issue with hono/http-exception
+
 import { dynamic, InferRouterInputs, InferRouterOutputs } from 'jstack'
 import { j } from './jstack'
+// @ts-ignore - Type declaration issue with hono/http-exception
+
 import { cors } from 'hono/cors'
 
 /**
@@ -42,7 +46,7 @@ const appRouter = j.mergeRouters(api, {
   settings: dynamic(() => import('./routers/settings-router')),
   auth_router: dynamic(() => import('./routers/auth-router')),
   stripe: dynamic(() => import('./routers/stripe-router')),
-  feed: dynamic(() => import("./routers/feed-router"))
+  feed: dynamic(() => import('./routers/feed-router')),
 })
 
 export type AppRouter = typeof appRouter
