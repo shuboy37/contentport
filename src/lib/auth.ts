@@ -53,9 +53,9 @@ export const auth = betterAuth({
 
         try {
           const res = await resend.emails.send({
-            from: 'Josh <josh@mail.contentport.io>',
+            from: 'onboarding@resend.dev', // Resend's free sandbox email for testing
             to: [email],
-            subject: 'Sign into Contentport',
+            subject: 'Sign into Contentport (Local Dev)',
             text: `Click this link to sign into Contentport: ${emailUrl}`,
           })
 
