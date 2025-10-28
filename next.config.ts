@@ -3,7 +3,32 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pdf-parse'],
   devIndicators: false,
-  
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Prevent Node.js built-ins from being bundled on client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+
+      // Ignore node: protocol imports
+      config.plugins = config.plugins || []
+      config.plugins.push(
+        new (require('webpack').NormalModuleReplacementPlugin)(
+          /^node:/,
+          (resource: any) => {
+            resource.request = resource.request.replace(/^node:/, '')
+          }
+        )
+      )
+    }
+    return config
+  },
+
   images: {
     remotePatterns: [
       {

@@ -2,7 +2,7 @@
 
 import { ArrowUp, History, Paperclip, Plus, Square, X } from 'lucide-react'
 import { useCallback, useContext, useEffect, useState } from 'react'
-
+import { ConditionalTooltip } from '@/components/ui/conditional-tooltip'
 import {
   Sidebar,
   SidebarContent,
@@ -92,7 +92,7 @@ const ChatInput = ({
       accounts?.some(({ postIndexingStatus }) => postIndexingStatus === 'started'),
     event: 'index_memories.status',
     onData: () => refetchAccounts(),
-  })
+  }) ?? { status: undefined }
 
   const isIndexing = status === 'connecting' || status === 'connected'
 
@@ -137,7 +137,7 @@ const ChatInput = ({
 
         return true
       },
-      COMMAND_PRIORITY_HIGH,
+      COMMAND_PRIORITY_HIGH
     )
 
     const removePasteCommand = editor.registerCommand<ClipboardEvent>(
@@ -161,7 +161,7 @@ const ChatInput = ({
 
         return false
       },
-      COMMAND_PRIORITY_HIGH,
+      COMMAND_PRIORITY_HIGH
     )
 
     return () => {
@@ -191,7 +191,7 @@ const ChatInput = ({
         return
       }
     },
-    [handleFilesAdded, editor],
+    [handleFilesAdded, editor]
   )
 
   return (
@@ -274,16 +274,22 @@ const ChatInput = ({
 
               <div className="flex items-center justify-between px-3 pb-3">
                 <div className="flex gap-1.5 items-center">
-                  <FileUploadTrigger asChild>
-                    <DuolingoButton
-                      disabled={isIndexing}
-                      type="button"
-                      variant="secondary"
-                      size="icon"
-                    >
-                      <Paperclip className="text-stone-600 size-5" />
-                    </DuolingoButton>
-                  </FileUploadTrigger>
+                  <ConditionalTooltip
+                    content="Attach a file"
+                    side="top"
+                    showTooltip={true}
+                  >
+                    <FileUploadTrigger asChild>
+                      <DuolingoButton
+                        disabled={isIndexing}
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                      >
+                        <Paperclip className="text-stone-600 size-5" />
+                      </DuolingoButton>
+                    </FileUploadTrigger>
+                  </ConditionalTooltip>
                 </div>
 
                 {disabled ? (
@@ -343,7 +349,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
         scroll: false,
       })
     },
-    [router],
+    [router]
   )
 
   const handleSubmit = useCallback(
@@ -369,7 +375,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
         })
       }
     },
-    [searchParams, updateURL, id, sendMessage, attachments, removeAttachment, tweets],
+    [searchParams, updateURL, id, sendMessage, attachments, removeAttachment, tweets]
   )
 
   const handleNewChat = useCallback(() => {
@@ -380,7 +386,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
     (files: File[]) => {
       files.forEach(addChatAttachment)
     },
-    [addChatAttachment],
+    [addChatAttachment]
   )
 
   const { setId } = useChatContext()
@@ -479,7 +485,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                       const root = $getRoot()
                       const paragraph = $createParagraphNode()
                       const text = $createTextNode(
-                        'Suggest a tweet about the Zod 4.0 release: https://zod.dev/v4',
+                        'Suggest a tweet about the Zod 4.0 release: https://zod.dev/v4'
                       )
                       root.clear()
                       paragraph.append(text)
@@ -503,7 +509,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                       const root = $getRoot()
                       const paragraph = $createParagraphNode()
                       const text = $createTextNode(
-                        'Draft 2 tweets about imposter syndrome in tech',
+                        'Draft 2 tweets about imposter syndrome in tech'
                       )
                       root.clear()
                       paragraph.append(text)
@@ -527,7 +533,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                       const root = $getRoot()
                       const paragraph = $createParagraphNode()
                       const text = $createTextNode(
-                        'Create a thread about 3 productivity tips for remote devs',
+                        'Create a thread about 3 productivity tips for remote devs'
                       )
                       root.clear()
                       paragraph.append(text)
@@ -551,7 +557,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                       const root = $getRoot()
                       const paragraph = $createParagraphNode()
                       const text = $createTextNode(
-                        'Tweet about a complex programming concept in simple terms',
+                        'Tweet about a complex programming concept in simple terms'
                       )
                       root.clear()
                       paragraph.append(text)
@@ -604,8 +610,8 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
               {isHistoryPending
                 ? 'Loading...'
                 : chatHistoryData?.chatHistory?.length
-                  ? `Showing ${chatHistoryData?.chatHistory?.length} most recent chats`
-                  : 'No chat history yet'}
+                ? `Showing ${chatHistoryData?.chatHistory?.length} most recent chats`
+                : 'No chat history yet'}
             </p>
           </div>
 

@@ -33,7 +33,12 @@ export function WhatsNewModal({ open, onOpenChange }: WhatsNewModalProps) {
   })
 
   return (
-    <Modal preventDefaultClose showModal={open} setShowModal={onOpenChange} className="max-w-xl">
+    <Modal
+      preventDefaultClose={false}
+      showModal={open}
+      setShowModal={onOpenChange}
+      className="max-w-xl"
+    >
       <div className="flex flex-col items-stretch gap-6 p-8">
         <div className="relative z-10 isolate flex items-center -space-x-1.5">
           <img

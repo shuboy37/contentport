@@ -68,7 +68,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@upstash/qstash": "^2.8.1",
     "@upstash/ratelimit": "^2.0.5",
-    "@upstash/realtime": "^0.3.0",
+    "@upstash/realtime": "^0.2.4",
     "@upstash/redis": "^1.35.4",
     "@upstash/vector": "^1.2.2",
     "@vercel/analytics": "^1.5.0",
@@ -79,6 +79,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "combined-stream": "1.0.8",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "deepl-node": "^1.17.3",
@@ -140,7 +141,7 @@
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
-    "zod": "^4.1.12",
+    "zod": "^3.25.51",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -159,5 +160,5 @@
     "tsx": "^4.20.3",
     "typescript": "^5"
   },
-  "packageManager": "bun@1.2.19"
+  "packageManager": "pnpm@10.19.0"
 }

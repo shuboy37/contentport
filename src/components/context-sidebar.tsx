@@ -12,6 +12,7 @@ import { createSerializer, parseAsString } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { SupportModal } from '@/components/support-modal'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import { ConditionalTooltip } from './ui/conditional-tooltip'
 import {
   Sidebar,
   SidebarContent,
@@ -63,28 +64,33 @@ export const LeftSidebar = () => {
               className="absolute pointer-events-none bottom-0 left-4 right-4 border-b border-stone-200"
             />
           )}
-
-          <button
-            onClick={toggleSidebar}
-            className={cn(
-              buttonVariants({
-                variant: 'ghost',
-                className:
-                  'w-full cursor-pointer h-14 group/toggle justify-start gap-2 p-2 hover:bg-transparent',
-              }),
-            )}
+          <ConditionalTooltip
+            content="Toggle Sidebar"
+            side="right"
+            showTooltip={isCollapsed}
           >
-            <div className="relative w-fit h-10 flex group-hover/toggle:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0">
-              <PanelLeft className="size-[18px] w-12 transition-all duration-200 group-hover/toggle:opacity-0 group-hover/toggle:scale-75" />
-              <div className="absolute transition-all duration-200 opacity-0 scale-75 group-hover/toggle:opacity-100 group-hover/toggle:scale-100">
-                {isCollapsed ? (
-                  <ArrowRightFromLine className="size-[18px] w-12" />
-                ) : (
-                  <ArrowLeftFromLine className="size-[18px] w-12" />
-                )}
+            <button
+              onClick={toggleSidebar}
+              className={cn(
+                buttonVariants({
+                  variant: 'ghost',
+                  className:
+                    'w-full cursor-pointer h-14 group/toggle justify-start gap-2 p-2 hover:bg-transparent',
+                })
+              )}
+            >
+              <div className="relative w-fit h-10 flex group-hover/toggle:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0">
+                <PanelLeft className="size-[18px] w-12 transition-all duration-200 group-hover/toggle:opacity-0 group-hover/toggle:scale-75" />
+                <div className="absolute transition-all duration-200 opacity-0 scale-75 group-hover/toggle:opacity-100 group-hover/toggle:scale-100">
+                  {isCollapsed ? (
+                    <ArrowRightFromLine className="size-[18px] w-12" />
+                  ) : (
+                    <ArrowLeftFromLine className="size-[18px] w-12" />
+                  )}
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          </ConditionalTooltip>
         </SidebarHeader>
 
         <SidebarContent className="overflow-x-hidden gap-0">
@@ -97,40 +103,42 @@ export const LeftSidebar = () => {
               />
             )}
             <SidebarGroupContent>
-              <Link
-                suppressHydrationWarning
-                href={{
-                  pathname: '/studio',
-                  search: serialize({ chatId: id }),
-                }}
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className:
-                      'w-full cursor-pointer h-14 group/create justify-start gap-2 p-2 hover:bg-transparent',
-                  }),
-                )}
-              >
-                <div
+              <ConditionalTooltip content="Studio" side="right" showTooltip={isCollapsed}>
+                <Link
+                  suppressHydrationWarning
+                  href={{
+                    pathname: '/studio',
+                    search: serialize({ chatId: id }),
+                  }}
                   className={cn(
-                    'w-full h-10 flex  group-hover/create:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
-                    { 'bg-stone-200': pathname === '/studio' },
+                    buttonVariants({
+                      variant: 'ghost',
+                      className:
+                        'w-full cursor-pointer h-14 group/create justify-start gap-2 p-2 hover:bg-transparent',
+                    })
                   )}
                 >
-                  <Icons.pencil className="size-[18px] w-12" />
-                  <span
-                    data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  <div
                     className={cn(
-                      'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
-                      {
-                        'opacity-0': !isMounted,
-                      },
+                      'w-full h-10 flex  group-hover/create:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
+                      { 'bg-stone-200': pathname === '/studio' }
                     )}
                   >
-                    Create
-                  </span>
-                </div>
-              </Link>
+                    <Icons.pencil className="size-[18px] w-12" />
+                    <span
+                      data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                      className={cn(
+                        'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
+                        {
+                          'opacity-0': !isMounted,
+                        }
+                      )}
+                    >
+                      Create
+                    </span>
+                  </div>
+                </Link>
+              </ConditionalTooltip>
             </SidebarGroupContent>
           </SidebarGroup>
 
@@ -149,46 +157,52 @@ export const LeftSidebar = () => {
                 'data-[state=collapsed]:pointer-events-none data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 px-3',
                 {
                   'opacity-0': !isMounted,
-                },
+                }
               )}
             >
               Engage
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <Link
-                suppressHydrationWarning
-                href={{
-                  pathname: '/studio/topic-monitor',
-                  search: serialize({ chatId: id }),
-                }}
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className:
-                      'w-full cursor-pointer h-14 group/engage justify-start gap-2 p-2 hover:bg-transparent',
-                  }),
-                )}
+              <ConditionalTooltip
+                content="Keyword Monitor"
+                side="right"
+                showTooltip={isCollapsed}
               >
-                <div
+                <Link
+                  suppressHydrationWarning
+                  href={{
+                    pathname: '/studio/topic-monitor',
+                    search: serialize({ chatId: id }),
+                  }}
                   className={cn(
-                    'w-full h-10 flex group-hover/engage:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
-                    { 'bg-stone-200': pathname === '/studio/topic-monitor' },
+                    buttonVariants({
+                      variant: 'ghost',
+                      className:
+                        'w-full cursor-pointer h-14 group/engage justify-start gap-2 p-2 hover:bg-transparent',
+                    })
                   )}
                 >
-                  <Icons.magnifier className="size-[18px] w-12" />
-                  <span
-                    data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  <div
                     className={cn(
-                      'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
-                      {
-                        'opacity-0': !isMounted,
-                      },
+                      'w-full h-10 flex group-hover/engage:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
+                      { 'bg-stone-200': pathname === '/studio/topic-monitor' }
                     )}
                   >
-                    Keyword Monitor
-                  </span>
-                </div>
-              </Link>
+                    <Icons.magnifier className="size-[18px] w-12" />
+                    <span
+                      data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                      className={cn(
+                        'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
+                        {
+                          'opacity-0': !isMounted,
+                        }
+                      )}
+                    >
+                      Keyword Monitor
+                    </span>
+                  </div>
+                </Link>
+              </ConditionalTooltip>
             </SidebarGroupContent>
           </SidebarGroup>
 
@@ -206,81 +220,92 @@ export const LeftSidebar = () => {
                 'data-[state=collapsed]:pointer-events-none data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 px-3',
                 {
                   'opacity-0': !isMounted,
-                },
+                }
               )}
             >
               Manage
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <Link
-                suppressHydrationWarning
-                href={{
-                  pathname: '/studio/knowledge',
-                  search: serialize({ chatId: id }),
-                }}
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className:
-                      'w-full cursor-pointer h-14 pt-2 group/knowledge justify-start gap-2 p-2 hover:bg-transparent',
-                  }),
-                )}
+              <ConditionalTooltip
+                content="Knowledge Base"
+                side="right"
+                showTooltip={isCollapsed}
               >
-                <div
+                <Link
+                  suppressHydrationWarning
+                  href={{
+                    pathname: '/studio/knowledge',
+                    search: serialize({ chatId: id }),
+                  }}
                   className={cn(
-                    'w-full h-10 flex group-hover/knowledge:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
-                    { 'bg-stone-200': pathname.includes('/studio/knowledge') },
+                    buttonVariants({
+                      variant: 'ghost',
+                      className:
+                        'w-full cursor-pointer h-14 pt-2 group/knowledge justify-start gap-2 p-2 hover:bg-transparent',
+                    })
                   )}
                 >
-                  <Icons.brain className="size-[20px] w-12" />
-                  <span
-                    data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  <div
                     className={cn(
-                      'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
-                      {
-                        'opacity-0': !isMounted,
-                      },
+                      'w-full h-10 flex group-hover/knowledge:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
+                      { 'bg-stone-200': pathname.includes('/studio/knowledge') }
                     )}
                   >
-                    Knowledge Base
-                  </span>
-                </div>
-              </Link>
-
-              <Link
-                suppressHydrationWarning
-                href={{
-                  pathname: '/studio/scheduled',
-                  search: serialize({ chatId: id }),
-                }}
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className:
-                      'w-full cursor-pointer h-14 pb-2 group/scheduled justify-start gap-2 p-2 hover:bg-transparent',
-                  }),
-                )}
+                    <Icons.brain className="size-[20px] w-12" />
+                    <span
+                      data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                      className={cn(
+                        'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
+                        {
+                          'opacity-0': !isMounted,
+                        }
+                      )}
+                    >
+                      Knowledge Base
+                    </span>
+                  </div>
+                </Link>
+              </ConditionalTooltip>
+              <ConditionalTooltip
+                content="Schedule"
+                side="right"
+                showTooltip={isCollapsed}
               >
-                <div
+                <Link
+                  suppressHydrationWarning
+                  href={{
+                    pathname: '/studio/scheduled',
+                    search: serialize({ chatId: id }),
+                  }}
                   className={cn(
-                    'w-full h-10 flex group-hover/scheduled:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
-                    { 'bg-stone-200': pathname === '/studio/scheduled' },
+                    buttonVariants({
+                      variant: 'ghost',
+                      className:
+                        'w-full cursor-pointer h-14 pb-2 group/scheduled justify-start gap-2 p-2 hover:bg-transparent',
+                    })
                   )}
                 >
-                  <Icons.calendar className="size-[18px] w-12" />
-                  <span
-                    data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  <div
                     className={cn(
-                      'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
-                      {
-                        'opacity-0': !isMounted,
-                      },
+                      'w-full h-10 flex group-hover/scheduled:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
+                      { 'bg-stone-200': pathname === '/studio/scheduled' }
                     )}
                   >
-                    Schedule
-                  </span>
-                </div>
-              </Link>
+                    <Icons.calendar className="size-[18px] w-12" />
+                    <span
+                      data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                      className={cn(
+                        'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
+                        {
+                          'opacity-0': !isMounted,
+                        }
+                      )}
+                    >
+                      Schedule
+                    </span>
+                  </div>
+                </Link>
+              </ConditionalTooltip>
             </SidebarGroupContent>
           </SidebarGroup>
 
@@ -292,46 +317,52 @@ export const LeftSidebar = () => {
                 'data-[state=collapsed]:pointer-events-none data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 px-3',
                 {
                   'opacity-0': !isMounted,
-                },
+                }
               )}
             >
               Account
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <Link
-                suppressHydrationWarning
-                href={{
-                  pathname: '/studio/accounts',
-                  search: serialize({ chatId: id }),
-                }}
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className:
-                      'w-full cursor-pointer h-14 group/accounts justify-start gap-2 p-2 hover:bg-transparent',
-                  }),
-                )}
+              <ConditionalTooltip
+                content="Accounts"
+                side="right"
+                showTooltip={isCollapsed}
               >
-                <div
+                <Link
+                  suppressHydrationWarning
+                  href={{
+                    pathname: '/studio/accounts',
+                    search: serialize({ chatId: id }),
+                  }}
                   className={cn(
-                    'w-full h-10 flex group-hover/accounts:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
-                    { 'bg-stone-200': pathname.includes('/studio/accounts') },
+                    buttonVariants({
+                      variant: 'ghost',
+                      className:
+                        'w-full cursor-pointer h-14 group/accounts justify-start gap-2 p-2 hover:bg-transparent',
+                    })
                   )}
                 >
-                  <Icons.imageIcon className="size-[18px] w-12 -mt-[3px]" />
-                  <span
-                    data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  <div
                     className={cn(
-                      'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
-                      {
-                        'opacity-0': !isMounted,
-                      },
+                      'w-full h-10 flex group-hover/accounts:bg-stone-200 transition-colors rounded-md items-center justify-start flex-shrink-0',
+                      { 'bg-stone-200': pathname.includes('/studio/accounts') }
                     )}
                   >
-                    Accounts
-                  </span>
-                </div>
-              </Link>
+                    <Icons.imageIcon className="size-[18px] w-12 -mt-[3px]" />
+                    <span
+                      data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                      className={cn(
+                        'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200',
+                        {
+                          'opacity-0': !isMounted,
+                        }
+                      )}
+                    >
+                      Accounts
+                    </span>
+                  </div>
+                </Link>
+              </ConditionalTooltip>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -341,85 +372,88 @@ export const LeftSidebar = () => {
             <div className="absolute w-10 mx-auto top-0 left-0 right-0 border-t border-stone-200" />
           )}
           {/* Support */}
-          <button
-            onClick={() => setIsSupportOpen(true)}
-            className={cn(
-              buttonVariants({
-                variant: 'ghost',
-                className:
-                  'w-full cursor-pointer h-14 group/contact justify-start gap-2 p-2 hover:bg-transparent',
-              }),
-            )}
-          >
-            <div
+          <ConditionalTooltip content="Support" side="right" showTooltip={isCollapsed}>
+            <button
+              onClick={() => setIsSupportOpen(true)}
               className={cn(
-                'relative w-full h-10 flex group-hover/contact:bg-stone-200 transition-colors rounded-md items-center flex-shrink-0',
+                buttonVariants({
+                  variant: 'ghost',
+                  className:
+                    'w-full cursor-pointer h-14 group/contact justify-start gap-2 p-2 hover:bg-transparent',
+                })
               )}
             >
-              <div className="!w-12">
-                <Icons.outboxTray className="size-[18px] w-12" />
-              </div>
-              <span
-                data-state={isCollapsed ? 'collapsed' : 'expanded'}
+              <div
                 className={cn(
-                  'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 absolute left-12',
-                  { 'opacity-0': !isMounted },
+                  'relative w-full h-10 flex group-hover/contact:bg-stone-200 transition-colors rounded-md items-center flex-shrink-0'
                 )}
               >
-                Support
-              </span>
-            </div>
-          </button>
-
+                <div className="!w-12">
+                  <Icons.outboxTray className="size-[18px] w-12" />
+                </div>
+                <span
+                  data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  className={cn(
+                    'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 absolute left-12',
+                    { 'opacity-0': !isMounted }
+                  )}
+                >
+                  Support
+                </span>
+              </div>
+            </button>
+          </ConditionalTooltip>
           {/* Settings */}
-          <Link
-            suppressHydrationWarning
-            href={{
-              pathname: `/studio/settings`,
-              search: id ? `?chatId=${id}` : undefined,
-            }}
-            className={cn(
-              buttonVariants({
-                variant: 'ghost',
-                className:
-                  'w-full cursor-pointer h-14 group/settings justify-start gap-2 p-2 hover:bg-transparent',
-              }),
-            )}
-          >
-            <div
+          <ConditionalTooltip content="Settings" side="right" showTooltip={isCollapsed}>
+            <Link
+              suppressHydrationWarning
+              href={{
+                pathname: `/studio/settings`,
+                search: id ? `?chatId=${id}` : undefined,
+              }}
               className={cn(
-                'relative w-full h-10 flex group-hover/settings:bg-stone-200 transition-colors rounded-md items-center flex-shrink-0',
-                { 'bg-stone-200': pathname.includes('/studio/settings') },
+                buttonVariants({
+                  variant: 'ghost',
+                  className:
+                    'w-full cursor-pointer h-14 group/settings justify-start gap-2 p-2 hover:bg-transparent',
+                })
               )}
             >
-              <div className="!w-12">
-                {data?.user.image ? (
-                  <Avatar className="mx-auto size-7 border border-stone-300">
-                    <AvatarImage
-                      src={data.user.image}
-                      alt={data.user.name ?? 'Profile'}
-                    />
-                    <AvatarFallback className="text-xs">
-                      {data.user.name?.charAt(0) ?? null}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <Icons.gear className="size-[20px] w-12" />
-                )}
-              </div>
-              <span
-                data-state={isCollapsed ? 'collapsed' : 'expanded'}
+              <div
                 className={cn(
-                  'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 absolute left-12',
-                  {
-                    'opacity-0': !isMounted,
-                  },
+                  'relative w-full h-10 flex group-hover/settings:bg-stone-200 transition-colors rounded-md items-center flex-shrink-0',
+                  { 'bg-stone-200': pathname.includes('/studio/settings') }
                 )}
               >
-                Settings
-              </span>
-            </div>
-          </Link>
+                <div className="!w-12">
+                  {data?.user.image ? (
+                    <Avatar className="mx-auto size-7 border border-stone-300">
+                      <AvatarImage
+                        src={data.user.image}
+                        alt={data.user.name ?? 'Profile'}
+                      />
+                      <AvatarFallback className="text-xs">
+                        {data.user.name?.charAt(0) ?? null}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <Icons.gear className="size-[20px] w-12" />
+                  )}
+                </div>
+                <span
+                  data-state={isCollapsed ? 'collapsed' : 'expanded'}
+                  className={cn(
+                    'data-[state=expanded]:animate-in data-[state=expanded]:fade-in data-[state=collapsed]:animate-out data-[state=collapsed]:fade-out fill-mode-forwards duration-200 absolute left-12',
+                    {
+                      'opacity-0': !isMounted,
+                    }
+                  )}
+                >
+                  Settings
+                </span>
+              </div>
+            </Link>
+          </ConditionalTooltip>
         </SidebarFooter>
       </Sidebar>
       <SupportModal open={isSupportOpen} onOpenChange={setIsSupportOpen} />
